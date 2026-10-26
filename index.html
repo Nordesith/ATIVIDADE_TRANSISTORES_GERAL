@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missão Eletrônica — Desafio dos Semicondutores</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html { font-size: calc(16px * var(--fs, 1)); }
+  *:focus-visible { outline: 3px solid #4338ca; outline-offset: 3px; border-radius: 4px; }
+
+  .no-motion *, .no-motion *::before, .no-motion *::after {
+    animation: none !important; transition: none !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Alto contraste */
+  body.hc { background: #000 !important; color: #f8fafc !important; }
+  body.hc header, body.hc main > *, body.hc .bg-white, body.hc .bg-slate-50,
+  body.hc .bg-slate-100, body.hc .bg-indigo-50, body.hc .bg-emerald-50,
+  body.hc .bg-amber-50 {
+    background: #0f172a !important; color: #f8fafc !important;
+    border-color: #fde047 !important;
+  }
+  body.hc h1, body.hc h2, body.hc h3, body.hc h4 { color: #fde047 !important; }
+  body.hc .text-slate-500, body.hc .text-slate-600,
+  body.hc .text-slate-700, body.hc .text-slate-800, body.hc .text-indigo-900,
+  body.hc .text-indigo-800, body.hc .text-indigo-700, body.hc .text-emerald-800,
+  body.hc .text-amber-900, body.hc .text-amber-800 {
+    color: #f8fafc !important;
+  }
+  body.hc button, body.hc .option-btn, body.hc input, body.hc .lab-tab, body.hc .tab-btn {
+    background: #0f172a !important; color: #f8fafc !important;
+    border: 2px solid #fde047 !important;
+  }
+  body.hc .tab-btn[aria-selected="true"] { background: #fde047 !important; color: #000 !important; }
+  body.hc .option-btn.correct { background: #14532d !important; }
+  body.hc .option-btn.wrong   { background: #7f1d1d !important; }
+  body.hc .feedback-success { background: #14532d !important; color: #f8fafc !important; border-left-color: #4ade80 !important; }
+  body.hc .feedback-info { background: #713f12 !important; color: #f8fafc !important; border-left-color: #fde047 !important; }
+  body.hc svg text { fill: #fde047 !important; }
+  body.hc svg line, body.hc svg path, body.hc svg rect, body.hc svg polygon, body.hc svg circle {
+    stroke: #fde047 !important;
+  }
+
+  /* Alternativas */
+  .option-btn { transition: background .15s, border-color .15s; }
+  .option-btn:hover:not(:disabled) { background: #eef2ff; border-color: #6366f1; }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct { border-color: #16a34a !important; background: #dcfce7 !important; }
+  .option-btn.wrong   { border-color: #dc2626 !important; background: #fee2e2 !important; }
+
+  .feedback-success { background: #dcfce7; border-left: 4px solid #16a34a; }
+  .feedback-info    { background: #fef3c7; border-left: 4px solid #d97706; }
+
+  /* Abas */
+  .tab-btn { transition: background .15s, color .15s; }
+  .tab-btn[aria-selected="true"] { background: white; color: #1e1b4b; font-weight: 700; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ============ LABORATÓRIO — ELEMENTOS ANIMADOS ============ */
+  .lab-on-ind { opacity: 0; transition: opacity .35s ease; }
+  .lab-on .lab-on-ind { opacity: 1; }
+
+  .lab-off-ind { opacity: 1; transition: opacity .35s ease; }
+  .lab-on .lab-off-ind { opacity: 0; }
+
+  .lab-on .glow { filter: drop-shadow(0 0 8px #fbbf24); }
+
+  .lab-on .current-flow {
+    stroke-dasharray: 6 8;
+    animation: currentFlow 1s linear infinite;
+    stroke-linecap: round;
+  }
+  @keyframes currentFlow {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -28; }
+  }
+
+  .lab-on .spin {
+    animation: labSpin 1.4s linear infinite;
+    transform-origin: 0 0;
+  }
+  @keyframes labSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .lab-on .pulse { animation: labPulse 1.6s ease-in-out infinite; }
+  @keyframes labPulse {
+    0%, 100% { opacity: .55; }
+    50%      { opacity: 1; }
+  }
+
+  .lab-on .led-glow { filter: drop-shadow(0 0 10px #fbbf24) drop-shadow(0 0 18px #f59e0b); }
+
+  /* ============ IMPRESSÃO DO CERTIFICADO (PAISAGEM) ============ */
+  @media print {
+    body { margin: 0 !important; padding: 0 !important; background: white !important; }
+    body * { visibility: hidden; }
+    #certificate-print-area,
+    #certificate-print-area * { visibility: visible; }
+    #certificate-print-area {
+      display: block !important;
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%;
+      margin: 0; padding: 0;
+    }
+    @page { size: A4 landscape; margin: 6mm; }
+  }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+<!-- ===================== CABEÇALHO ===================== -->
+<header class="bg-indigo-900 text-white">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="text-xl md:text-2xl font-bold tracking-wide">MISSÃO ELETRÔNICA</h1>
+      <p class="text-indigo-200 text-sm mt-1">Descubra como os semicondutores controlam sinais, energia e informação.</p>
+      <p class="text-indigo-300 text-xs mt-1">Sistemas Eletrônicos · Técnico em Mecatrônica</p>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      <button id="btn-comfort" type="button" class="bg-indigo-700 hover:bg-indigo-600 px-3 py-2 rounded-lg text-sm font-medium" aria-expanded="false" aria-controls="comfort-panel">⚙️ Ajustes de conforto</button>
+      <button id="btn-review" type="button" class="bg-indigo-700 hover:bg-indigo-600 px-3 py-2 rounded-lg text-sm font-medium">📖 Revisar conceito</button>
+    </div>
+  </div>
+  <nav class="bg-indigo-800" role="tablist" aria-label="Seções da plataforma">
+    <div class="max-w-6xl mx-auto px-2 flex gap-1 overflow-x-auto">
+      <button role="tab" id="tab-missions-btn" data-tab="missions" aria-selected="true" aria-controls="tab-missions" class="tab-btn whitespace-nowrap text-indigo-100 px-4 py-3 text-sm rounded-t-lg">🎯 Missões</button>
+      <button role="tab" id="tab-lab-btn" data-tab="lab" aria-selected="false" aria-controls="tab-lab" class="tab-btn whitespace-nowrap text-indigo-100 px-4 py-3 text-sm rounded-t-lg">🔬 Laboratório Virtual</button>
+      <button role="tab" id="tab-components-btn" data-tab="components" aria-selected="false" aria-controls="tab-components" class="tab-btn whitespace-nowrap text-indigo-100 px-4 py-3 text-sm rounded-t-lg">📦 Componentes</button>
+    </div>
+  </nav>
+</header>
+
+<!-- ===================== PAINEL DE CONFORTO ===================== -->
+<aside id="comfort-panel" class="hidden bg-white border-b border-slate-200" aria-label="Ajustes de conforto">
+  <div class="max-w-6xl mx-auto px-4 py-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div>
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Tamanho do texto</p>
+        <div class="flex gap-1">
+          <button type="button" id="fs-dec" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded font-bold text-sm" aria-label="Diminuir texto">A−</button>
+          <button type="button" id="fs-reset" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm" aria-label="Restaurar texto">A</button>
+          <button type="button" id="fs-inc" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded font-bold text-sm" aria-label="Aumentar texto">A+</button>
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+        <input type="checkbox" id="opt-contrast" class="w-5 h-5 accent-indigo-700"> Alto contraste
+      </label>
+      <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+        <input type="checkbox" id="opt-motion" class="w-5 h-5 accent-indigo-700"> Reduzir movimento
+      </label>
+      <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+        <input type="checkbox" id="opt-sound" class="w-5 h-5 accent-indigo-700"> Sons do jogo
+      </label>
+    </div>
+    <p class="text-xs text-slate-500 mt-3">As preferências ficam salvas no navegador. Os sons começam desligados.</p>
+  </div>
+</aside>
+
+<!-- ===================== CONTEÚDO PRINCIPAL ===================== -->
+<main class="max-w-6xl mx-auto px-4 py-6">
+
+  <section id="tab-missions" class="tab-panel active" role="tabpanel" aria-labelledby="tab-missions-btn">
+    <section aria-labelledby="progress-title" class="mb-6">
+      <h2 id="progress-title" class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Mapa de progresso</h2>
+      <div id="progress-map" class="grid grid-cols-2 md:grid-cols-5 gap-2"></div>
+    </section>
+
+    <section id="mission-section" aria-labelledby="mission-prompt">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 md:p-6">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 flex-wrap gap-2">
+          <span id="mission-badge" class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-lg text-sm font-semibold">Missão 1 de 25</span>
+          <span id="phase-label" class="text-sm text-slate-600 font-medium">Fase 1</span>
+        </div>
+        <h2 id="mission-prompt" class="text-lg md:text-xl font-semibold text-slate-900 mb-4 leading-relaxed"></h2>
+        <div id="illustration-area" class="mb-4"></div>
+        <div id="data-panel" class="hidden mb-4 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm"></div>
+        <div id="answer-area" class="mb-4"></div>
+        <div id="feedback-area" aria-live="polite"></div>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button type="button" id="btn-hint" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-4 py-2 rounded-lg font-medium text-sm">💡 Preciso de uma dica</button>
+          <button type="button" id="btn-explain" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-lg font-medium text-sm">📘 Ver explicação</button>
+          <button type="button" id="btn-next" class="hidden ml-auto bg-indigo-700 hover:bg-indigo-800 text-white px-5 py-2 rounded-lg font-semibold text-sm">Próxima missão →</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="certificate-screen" class="hidden" aria-labelledby="cert-title">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="text-center mb-6">
+          <div class="text-5xl mb-2" aria-hidden="true">🏆</div>
+          <h2 id="cert-title" class="text-xl md:text-2xl font-bold text-indigo-900">MISSÃO CUMPRIDA — ESPECIALISTA EM SISTEMAS ELETRÔNICOS</h2>
+          <p class="text-slate-600 mt-2 max-w-2xl mx-auto">Parabéns pela dedicação e pelo aprendizado construído ao longo destas 25 missões!</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
+          <h3 class="font-semibold text-indigo-900 mb-2">Síntese dos três conhecimentos fundamentais</h3>
+          <ul class="text-sm text-slate-700 space-y-1 list-disc list-inside">
+            <li><strong>TJB:</strong> a corrente de base controla a corrente entre coletor e emissor.</li>
+            <li><strong>FET:</strong> a tensão de controle modifica a condução do canal.</li>
+            <li><strong>Acoplador óptico:</strong> transfere sinais por meio da luz, mantendo isolamento elétrico dentro dos limites previstos no projeto.</li>
+          </ul>
+        </div>
+        <div class="max-w-2xl mx-auto mb-4">
+          <label for="student-name" class="block text-sm font-semibold text-slate-700 mb-1">Seu nome (opcional, para o certificado)</label>
+          <input type="text" id="student-name" maxlength="60" placeholder="Digite seu nome" class="w-full px-3 py-2 border-2 border-slate-300 rounded-lg focus:border-indigo-500 outline-none">
+        </div>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <button type="button" id="btn-print" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-semibold">🖨️ Imprimir ou salvar certificado em PDF</button>
+          <button type="button" id="btn-restart" class="bg-indigo-700 hover:bg-indigo-800 text-white px-5 py-2 rounded-lg font-semibold">🔄 Reiniciar atividade</button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section id="tab-lab" class="tab-panel" role="tabpanel" aria-labelledby="tab-lab-btn">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-indigo-900">🔬 Laboratório Virtual de Eletrônica</h2>
+      <p class="text-sm text-slate-600">Simulações conceituais com símbolos esquemáticos e circuitos de aplicação. Use os botões para ativar/desativar cada demonstração. Não substitui a análise de um circuito real.</p>
+    </div>
+    <div class="flex gap-2 mb-4 flex-wrap" role="tablist" aria-label="Escolher componente">
+      <button type="button" role="tab" data-lab="tjb" aria-selected="true" class="lab-tab bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">🔺 TJB</button>
+      <button type="button" role="tab" data-lab="mosfet" aria-selected="false" class="lab-tab bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg text-sm font-semibold">🔷 MOSFET</button>
+      <button type="button" role="tab" data-lab="opto" aria-selected="false" class="lab-tab bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg text-sm font-semibold">💡 Optoacoplador</button>
+    </div>
+    <div id="lab-detail"></div>
+  </section>
+
+  <section id="tab-components" class="tab-panel" role="tabpanel" aria-labelledby="tab-components-btn">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-indigo-900">📦 Galeria de Componentes</h2>
+      <p class="text-sm text-slate-600">Representações visuais dos principais componentes estudados. As dimensões são esquemáticas; consulte o datasheet para dimensões reais e pinagem.</p>
+    </div>
+    <div id="component-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </section>
+
+</main>
+
+<div id="review-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="review-title">
+  <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+    <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200">
+      <h2 id="review-title" class="font-bold text-lg text-indigo-900">📖 Revisar conceito</h2>
+      <button type="button" id="btn-review-close" class="text-slate-500 hover:text-slate-800 text-2xl leading-none px-2" aria-label="Fechar revisão">×</button>
+    </div>
+    <div id="review-content" class="overflow-y-auto p-4 space-y-3"></div>
+  </div>
+</div>
+
+<div id="certificate-print-area" class="hidden" aria-hidden="true">
+  <div id="certificate-print-content"></div>
+</div>
+
+<script>
+'use strict';
+
+/* =========================================================
+   1. FASES E DADOS
+   ========================================================= */
+const PHASES = [
+  { id: 1, name: 'Explorador dos Componentes', short: 'Explorador' },
+  { id: 2, name: 'Como os Componentes Funcionam', short: 'Funcionamento' },
+  { id: 3, name: 'Aplicação e Montagem Consciente', short: 'Aplicação' },
+  { id: 4, name: 'Especialista em Isolamento Óptico', short: 'Isolamento' },
+  { id: 5, name: 'Técnico em Ação', short: 'Integração' }
+];
+
+/* =========================================================
+   2. SVGs — SÍMBOLOS ESQUEMÁTICOS
+   ========================================================= */
+function svgNPN(opts = {}) {
+  const l = opts.labels !== false;
+  return `<svg viewBox="0 0 200 220" class="w-full max-w-[200px] h-auto" role="img" aria-label="Símbolo esquemático do transistor bipolar NPN">
+    <line x1="10" y1="110" x2="70" y2="110" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="55" x2="70" y2="165" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+    <line x1="70" y1="85" x2="140" y2="50" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="140" y1="50" x2="140" y2="15" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="135" x2="140" y2="170" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="140" y1="170" x2="140" y2="205" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="118,159 101,158 107,146" fill="#1e293b"/>
+    ${l ? `<text x="2" y="115" font-size="16" font-weight="bold" fill="#4338ca">B</text>
+    <text x="146" y="25" font-size="16" font-weight="bold" fill="#4338ca">C</text>
+    <text x="146" y="208" font-size="16" font-weight="bold" fill="#4338ca">E</text>` : ''}
+  </svg>`;
+}
+
+function svgPNP(opts = {}) {
+  const l = opts.labels !== false;
+  return `<svg viewBox="0 0 200 220" class="w-full max-w-[200px] h-auto" role="img" aria-label="Símbolo esquemático do transistor bipolar PNP">
+    <line x1="10" y1="110" x2="70" y2="110" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="55" x2="70" y2="165" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+    <line x1="70" y1="85" x2="140" y2="50" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="140" y1="50" x2="140" y2="15" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="135" x2="140" y2="170" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="140" y1="170" x2="140" y2="205" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="95,145 106,159 112,146" fill="#1e293b"/>
+    ${l ? `<text x="2" y="115" font-size="16" font-weight="bold" fill="#4338ca">B</text>
+    <text x="146" y="25" font-size="16" font-weight="bold" fill="#4338ca">C</text>
+    <text x="146" y="208" font-size="16" font-weight="bold" fill="#4338ca">E</text>` : ''}
+  </svg>`;
+}
+
+function svgMOSFET(opts = {}) {
+  const l = opts.labels !== false;
+  return `<svg viewBox="0 0 200 220" class="w-full max-w-[200px] h-auto" role="img" aria-label="Símbolo esquemático do MOSFET de enriquecimento canal N">
+    <line x1="10" y1="110" x2="55" y2="110" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="55" y1="65" x2="55" y2="155" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+    <line x1="75" y1="75" x2="90" y2="75" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+    <line x1="75" y1="110" x2="90" y2="110" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+    <line x1="75" y1="145" x2="90" y2="145" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+    <line x1="90" y1="75" x2="150" y2="75" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="150" y1="75" x2="150" y2="20" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="145" x2="150" y2="145" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="150" y1="145" x2="150" y2="200" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="110" x2="120" y2="110" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="120" y1="110" x2="120" y2="145" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="90,110 102,104 102,116" fill="#1e293b"/>
+    ${l ? `<text x="2" y="115" font-size="16" font-weight="bold" fill="#4338ca">G</text>
+    <text x="156" y="25" font-size="16" font-weight="bold" fill="#4338ca">D</text>
+    <text x="156" y="200" font-size="16" font-weight="bold" fill="#4338ca">S</text>` : ''}
+  </svg>`;
+}
+
+function svgOpto(opts = {}) {
+  const l = opts.labels !== false;
+  return `<svg viewBox="0 0 360 220" class="w-full max-w-[420px] h-auto" role="img" aria-label="Símbolo esquemático do acoplador óptico com LED e fototransistor">
+    <rect x="40" y="40" width="280" height="140" fill="none" stroke="#4338ca" stroke-width="2" stroke-dasharray="6 4" rx="8"/>
+    <line x1="5" y1="80" x2="70" y2="80" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="80" x2="70" y2="140" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="5" y1="140" x2="70" y2="140" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="70,90 70,130 100,110" fill="#1e293b"/>
+    <line x1="100" y1="90" x2="100" y2="130" stroke="#1e293b" stroke-width="3"/>
+    <line x1="100" y1="110" x2="100" y2="140" stroke="#1e293b" stroke-width="3"/>
+    <line x1="120" y1="95" x2="160" y2="95" stroke="#dc2626" stroke-width="2"/>
+    <polygon points="160,95 150,90 150,100" fill="#dc2626"/>
+    <line x1="120" y1="125" x2="160" y2="125" stroke="#dc2626" stroke-width="2"/>
+    <polygon points="160,125 150,120 150,130" fill="#dc2626"/>
+    <line x1="200" y1="85" x2="200" y2="135" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+    <line x1="200" y1="95" x2="250" y2="75" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="250" y1="75" x2="340" y2="75" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="200" y1="125" x2="250" y2="145" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="250" y1="145" x2="340" y2="145" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="245,143 228,141 234,130" fill="#1e293b"/>
+    ${l ? `<text x="8" y="75" font-size="12" font-weight="bold" fill="#4338ca">A</text>
+    <text x="8" y="155" font-size="12" font-weight="bold" fill="#4338ca">K</text>
+    <text x="344" y="70" font-size="12" font-weight="bold" fill="#4338ca">C</text>
+    <text x="344" y="155" font-size="12" font-weight="bold" fill="#4338ca">E</text>` : ''}
+  </svg>`;
+}
+
+/* =========================================================
+   3. SVG — EMBALAGENS
+   ========================================================= */
+function svgTO92(label = 'BC547', sub = 'B 166') {
+  return `<svg viewBox="0 0 120 170" class="w-full max-w-[130px] h-auto" role="img" aria-label="Encapsulamento TO-92 do transistor ${label}">
+    <path d="M 20,30 Q 60,8 100,30 L 100,105 Q 60,118 20,105 Z" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+    <text x="60" y="60" text-anchor="middle" font-size="11" fill="#f8fafc" font-weight="bold">${label}</text>
+    <text x="60" y="76" text-anchor="middle" font-size="9" fill="#cbd5e1">${sub}</text>
+    <line x1="35" y1="105" x2="35" y2="150" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="60" y1="110" x2="60" y2="155" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="85" y1="105" x2="85" y2="150" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+    <text x="35" y="165" text-anchor="middle" font-size="9" fill="#4338ca" font-weight="bold">1</text>
+    <text x="60" y="168" text-anchor="middle" font-size="9" fill="#4338ca" font-weight="bold">2</text>
+    <text x="85" y="165" text-anchor="middle" font-size="9" fill="#4338ca" font-weight="bold">3</text>
+  </svg>`;
+}
+
+function svgTO220(label = 'IRFZ44N') {
+  return `<svg viewBox="0 0 140 180" class="w-full max-w-[150px] h-auto" role="img" aria-label="Encapsulamento TO-220 do MOSFET ${label}">
+    <rect x="20" y="20" width="100" height="70" rx="4" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+    <rect x="55" y="8" width="30" height="20" rx="3" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+    <circle cx="70" cy="18" r="4" fill="#0f172a"/>
+    <text x="70" y="50" text-anchor="middle" font-size="10" fill="#f8fafc" font-weight="bold">${label}</text>
+    <text x="70" y="66" text-anchor="middle" font-size="8" fill="#cbd5e1">TO-220</text>
+    <line x1="40" y1="90" x2="40" y2="150" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="90" x2="70" y2="155" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="100" y1="90" x2="100" y2="150" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+    <text x="40" y="168" text-anchor="middle" font-size="9" fill="#4338ca" font-weight="bold">1 G</text>
+    <text x="70" y="172" text-anchor="middle" font-size="9" fill="#4338ca" font-weight="bold">2 D</text>
+    <text x="100" y="168" text-anchor="middle" font-size="9" fill="#4338ca" font-weight="bold">3 S</text>
+  </svg>`;
+}
+
+function svgDIP4(label = 'PC817', sub = 'SHARP') {
+  return `<svg viewBox="0 0 140 140" class="w-full max-w-[140px] h-auto" role="img" aria-label="Encapsulamento DIP do optoacoplador ${label}">
+    <rect x="20" y="40" width="100" height="60" rx="4" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+    <circle cx="32" cy="52" r="3" fill="#0f172a"/>
+    <text x="70" y="65" text-anchor="middle" font-size="10" fill="#f8fafc" font-weight="bold">${label}</text>
+    <text x="70" y="80" text-anchor="middle" font-size="8" fill="#cbd5e1">${sub}</text>
+    <line x1="35" y1="100" x2="35" y2="125" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="55" y1="100" x2="55" y2="125" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="85" y1="100" x2="85" y2="125" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="105" y1="100" x2="105" y2="125" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="35" y="136" text-anchor="middle" font-size="8" fill="#4338ca" font-weight="bold">A</text>
+    <text x="55" y="136" text-anchor="middle" font-size="8" fill="#4338ca" font-weight="bold">K</text>
+    <text x="85" y="136" text-anchor="middle" font-size="8" fill="#4338ca" font-weight="bold">E</text>
+    <text x="105" y="136" text-anchor="middle" font-size="8" fill="#4338ca" font-weight="bold">C</text>
+  </svg>`;
+}
+
+/* =========================================================
+   4. CIRCUITOS DE APLICAÇÃO ANIMADOS
+   ========================================================= */
+function svgTJBCircuit() {
+  return `<svg viewBox="0 0 480 290" class="w-full max-w-2xl h-auto" role="img" aria-label="Circuito de acionamento de relé com transistor NPN e diodo de roda livre">
+    <text x="240" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#4338ca">+V</text>
+
+    <!-- ===== Caminho V+ → Bobina (animado) ===== -->
+    <line x1="240" y1="30" x2="240" y2="60" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="240" y1="30" x2="240" y2="60" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+
+    <!-- Bobina do relé -->
+    <rect x="215" y="60" width="50" height="70" rx="4" fill="#f1f5f9" stroke="#1e293b" stroke-width="2"/>
+    <text x="240" y="98" text-anchor="middle" font-size="11" fill="#1e293b" font-weight="bold">Bobina</text>
+    <text x="240" y="112" text-anchor="middle" font-size="9" fill="#475569">do relé</text>
+    <rect x="215" y="60" width="50" height="70" rx="4" fill="#fbbf24" opacity="0.45" class="lab-on-ind glow"/>
+
+    <!-- ===== Bobina → Coletor (animado) ===== -->
+    <line x1="240" y1="130" x2="240" y2="175" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="240" y1="130" x2="240" y2="175" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+
+    <!-- ===== Diodo de roda livre ===== -->
+    <line x1="265" y1="60" x2="330" y2="60" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="330" y1="60" x2="330" y2="130" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="265" y1="130" x2="330" y2="130" stroke="#1e293b" stroke-width="2.5"/>
+    <polygon points="285,75 285,115 310,95" fill="#1e293b"/>
+    <line x1="310" y1="75" x2="310" y2="115" stroke="#1e293b" stroke-width="2.5"/>
+    <text x="350" y="85" font-size="10" fill="#dc2626" font-weight="bold">Diodo</text>
+    <text x="350" y="98" font-size="10" fill="#dc2626" font-weight="bold">de roda</text>
+    <text x="350" y="111" font-size="10" fill="#dc2626" font-weight="bold">livre</text>
+
+    <!-- ===== Transistor NPN ===== -->
+    <line x1="200" y1="165" x2="200" y2="245" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+    <line x1="240" y1="175" x2="200" y2="195" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="200" y1="225" x2="240" y2="245" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="222,235 208,238 212,226" fill="#1e293b"/>
+    <line x1="240" y1="175" x2="240" y2="150" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="240" y1="245" x2="240" y2="270" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="240" y1="175" x2="240" y2="245" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+    <line x1="240" y1="245" x2="240" y2="270" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+
+    <!-- Terra -->
+    <line x1="222" y1="270" x2="258" y2="270" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="228" y1="277" x2="252" y2="277" stroke="#1e293b" stroke-width="2"/>
+    <line x1="234" y1="284" x2="246" y2="284" stroke="#1e293b" stroke-width="2"/>
+
+    <!-- Rótulos B, C, E -->
+    <text x="190" y="160" font-size="12" font-weight="bold" fill="#4338ca">C</text>
+    <text x="190" y="258" font-size="12" font-weight="bold" fill="#4338ca">E</text>
+    <text x="188" y="208" font-size="12" font-weight="bold" fill="#4338ca">B</text>
+
+    <!-- ===== Resistor de base (R_B) ===== -->
+    <rect x="120" y="198" width="55" height="20" fill="#f1f5f9" stroke="#1e293b" stroke-width="2"/>
+    <text x="147" y="212" text-anchor="middle" font-size="11" fill="#1e293b" font-weight="bold">R_B</text>
+
+    <line x1="70" y1="208" x2="120" y2="208" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="70" y1="208" x2="120" y2="208" stroke="#fbbf24" stroke-width="3" class="lab-on-ind current-flow"/>
+
+    <line x1="175" y1="208" x2="200" y2="208" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="175" y1="208" x2="200" y2="208" stroke="#fbbf24" stroke-width="3" class="lab-on-ind current-flow"/>
+
+    <text x="42" y="204" font-size="11" fill="#475569">sinal</text>
+    <text x="42" y="218" font-size="11" fill="#475569">5 V</text>
+
+    <text x="110" y="150" font-size="10" fill="#b45309" font-style="italic">I_B (controle)</text>
+    <text x="290" y="200" font-size="10" fill="#b45309" font-style="italic">I_C (carga)</text>
+  </svg>`;
+}
+
+function svgMOSFETCircuit() {
+  return `<svg viewBox="0 0 480 290" class="w-full max-w-2xl h-auto" role="img" aria-label="Circuito de acionamento de motor CC por MOSFET e PWM">
+    <text x="240" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#4338ca">+V</text>
+
+    <line x1="240" y1="30" x2="240" y2="55" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="240" y1="30" x2="240" y2="55" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+
+    <circle cx="240" cy="90" r="34" fill="#fbbf24" opacity="0.35" class="lab-on-ind glow"/>
+    <circle cx="240" cy="90" r="26" fill="#f1f5f9" stroke="#1e293b" stroke-width="2"/>
+    <g transform="translate(240, 90)">
+      <g class="spin">
+        <g fill="#4338ca">
+          <rect x="-4" y="-24" width="8" height="9" rx="1"/>
+          <rect x="-4" y="15" width="8" height="9" rx="1"/>
+          <rect x="-24" y="-4" width="9" height="8" rx="1"/>
+          <rect x="15" y="-4" width="9" height="8" rx="1"/>
+          <rect x="-18" y="-18" width="8" height="9" rx="1" transform="rotate(-45)"/>
+          <rect x="10" y="10" width="8" height="9" rx="1" transform="rotate(-45)"/>
+          <rect x="10" y="-18" width="8" height="9" rx="1" transform="rotate(45)"/>
+          <rect x="-18" y="10" width="8" height="9" rx="1" transform="rotate(45)"/>
+        </g>
+        <circle r="16" fill="#e0e7ff" stroke="#4338ca" stroke-width="2"/>
+        <circle r="5" fill="#4338ca"/>
+      </g>
+    </g>
+    <text x="240" y="132" text-anchor="middle" font-size="10" fill="#1e293b" font-weight="bold">Motor CC</text>
+
+    <line x1="240" y1="116" x2="240" y2="155" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="240" y1="116" x2="240" y2="155" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+
+    <line x1="210" y1="165" x2="210" y2="245" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+    <line x1="225" y1="175" x2="240" y2="175" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+    <line x1="225" y1="205" x2="240" y2="205" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+    <line x1="225" y1="235" x2="240" y2="235" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+    <line x1="240" y1="155" x2="240" y2="175" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="240" y1="235" x2="240" y2="270" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="240" y1="205" x2="255" y2="205" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="255" y1="205" x2="255" y2="235" stroke="#1e293b" stroke-width="2.5"/>
+    <polygon points="248,205 240,199 240,211" fill="#1e293b"/>
+
+    <line x1="240" y1="175" x2="240" y2="235" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+    <line x1="240" y1="235" x2="240" y2="270" stroke="#fbbf24" stroke-width="4" class="lab-on-ind current-flow"/>
+
+    <line x1="222" y1="270" x2="258" y2="270" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="228" y1="277" x2="252" y2="277" stroke="#1e293b" stroke-width="2"/>
+    <line x1="234" y1="284" x2="246" y2="284" stroke="#1e293b" stroke-width="2"/>
+
+    <text x="196" y="165" font-size="12" font-weight="bold" fill="#4338ca">D</text>
+    <text x="196" y="258" font-size="12" font-weight="bold" fill="#4338ca">S</text>
+    <text x="178" y="208" font-size="12" font-weight="bold" fill="#4338ca">G</text>
+
+    <line x1="120" y1="208" x2="210" y2="208" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="120" y1="208" x2="210" y2="208" stroke="#fbbf24" stroke-width="3" class="lab-on-ind current-flow"/>
+
+    <text x="88" y="204" font-size="11" fill="#475569">PWM</text>
+    <text x="80" y="218" font-size="11" fill="#475569">(3,3 V)</text>
+
+    <text x="290" y="200" font-size="10" fill="#b45309" font-style="italic">V_GS controla</text>
+    <text x="290" y="214" font-size="10" fill="#b45309" font-style="italic">a condução</text>
+  </svg>`;
+}
+
+function svgOptoCircuit() {
+  return `<svg viewBox="0 0 520 290" class="w-full max-w-2xl h-auto" role="img" aria-label="Circuito de isolamento entre microcontrolador e carga de 24V usando optoacoplador">
+    <text x="85" y="22" text-anchor="middle" font-size="11" font-weight="bold" fill="#4338ca">Lado 1</text>
+    <text x="85" y="38" text-anchor="middle" font-size="10" fill="#475569">microcontrolador 3,3 V</text>
+
+    <rect x="40" y="60" width="90" height="70" rx="4" fill="#f1f5f9" stroke="#1e293b" stroke-width="2"/>
+    <text x="85" y="92" text-anchor="middle" font-size="11" fill="#1e293b" font-weight="bold">MCU</text>
+    <text x="85" y="110" text-anchor="middle" font-size="9" fill="#475569">GPIO</text>
+
+    <line x1="130" y1="95" x2="165" y2="95" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="130" y1="95" x2="165" y2="95" stroke="#fbbf24" stroke-width="3" class="lab-on-ind current-flow"/>
+
+    <rect x="165" y="86" width="45" height="18" fill="#f1f5f9" stroke="#1e293b" stroke-width="2"/>
+    <text x="187" y="99" text-anchor="middle" font-size="10" fill="#1e293b" font-weight="bold">R</text>
+
+    <line x1="210" y1="95" x2="240" y2="95" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="210" y1="95" x2="240" y2="95" stroke="#fbbf24" stroke-width="3" class="lab-on-ind current-flow"/>
+
+    <rect x="240" y="55" width="110" height="85" rx="6" fill="#fef3c7" stroke="#4338ca" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="295" y="72" text-anchor="middle" font-size="9" fill="#92400e" font-weight="bold">optoacoplador</text>
+
+    <line x1="265" y1="85" x2="265" y2="120" stroke="#1e293b" stroke-width="3"/>
+    <line x1="240" y1="102" x2="265" y2="102" stroke="#1e293b" stroke-width="2.5"/>
+    <circle cx="275" cy="102" r="14" fill="#fbbf24" opacity="0.55" class="lab-on-ind led-glow"/>
+
+    <line x1="315" y1="55" x2="315" y2="140" stroke="#dc2626" stroke-width="2" stroke-dasharray="4 3"/>
+
+    <path d="M 290 100 Q 300 92 310 100" stroke="#fbbf24" stroke-width="3" fill="none" class="lab-on-ind pulse"/>
+    <path d="M 290 105 Q 300 97 310 105" stroke="#fbbf24" stroke-width="3" fill="none" class="lab-on-ind pulse" style="animation-delay:.3s"/>
+
+    <line x1="330" y1="90" x2="330" y2="125" stroke="#1e293b" stroke-width="3"/>
+    <line x1="330" y1="95" x2="355" y2="85" stroke="#1e293b" stroke-width="2.5"/>
+    <line x1="330" y1="120" x2="355" y2="130" stroke="#1e293b" stroke-width="2.5"/>
+    <polygon points="345,127 335,124 340,115" fill="#1e293b"/>
+
+    <line x1="355" y1="95" x2="395" y2="95" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="355" y1="95" x2="395" y2="95" stroke="#fbbf24" stroke-width="3" class="lab-on-ind current-flow"/>
+
+    <rect x="395" y="72" width="75" height="46" rx="4" fill="#f1f5f9" stroke="#1e293b" stroke-width="2"/>
+    <text x="432" y="92" text-anchor="middle" font-size="10" fill="#1e293b" font-weight="bold">Carga</text>
+    <text x="432" y="108" text-anchor="middle" font-size="9" fill="#475569">24 V</text>
+
+    <rect x="395" y="72" width="75" height="46" rx="4" fill="#fbbf24" opacity="0.4" class="lab-on-ind glow"/>
+
+    <line x1="470" y1="95" x2="495" y2="95" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="470" y1="95" x2="495" y2="95" stroke="#fbbf24" stroke-width="3" class="lab-on-ind current-flow"/>
+    <text x="500" y="99" font-size="11" font-weight="bold" fill="#4338ca">+24V</text>
+
+    <text x="295" y="175" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="bold">Barreira de isolamento</text>
+    <text x="295" y="192" text-anchor="middle" font-size="10" fill="#475569">O sinal atravessa por luz.</text>
+    <text x="295" y="215" text-anchor="middle" font-size="10" fill="#475569">Não há contato elétrico condutivo entre os lados.</text>
+  </svg>`;
+}
+
+/* =========================================================
+   5. MISSÕES (REESTRUTURADAS COM LINGUAGEM ADAPTADA E DIRETA)
+   ========================================================= */
+const ILLUS = {
+  npnPnp: `<div class="flex justify-center items-center gap-6 flex-wrap my-2">
+    <figure class="text-center"><figcaption class="text-xs font-semibold text-indigo-800 mb-1">NPN</figcaption>${svgNPN()}</figure>
+    <figure class="text-center"><figcaption class="text-xs font-semibold text-indigo-800 mb-1">PNP</figcaption>${svgPNP()}</figure>
+  </div>`,
+  optoSymbol: `<div class="flex justify-center my-2">${svgOpto()}</div>`,
+  mosfetSymbol: `<div class="flex justify-center my-2">${svgMOSFET()}</div>`
+};
+
+const QUESTIONS = [
+  /* FASE 1 */
+  { id: 1, phase: 1, type: 'choice',
+    prompt: '<strong>Missão 1 — O Botão da Torneira (TJB)</strong><br>Imagine que o transistor TJB funciona como uma torneira de água. Qual perninha dele é o "botão" que nós giramos para controlar quanta corrente vai passar?',
+    options: ['Base (B)', 'Coletor (C)', 'Emissor (E)'], correct: 0,
+    hint: 'O nome dessa perninha começa com a letra B de "Botão de controle".',
+    explanation: 'Perfeito! A Base (B) é o pino de controle: aplicamos uma corrente bem pequena nela para controlar uma corrente muito maior entre o Coletor e o Emissor.',
+    illustration: 'npnPnp' },
+
+  { id: 2, phase: 1, type: 'choice',
+    prompt: '<strong>Missão 2 — As Três Tarefas do TJB</strong><br>O transistor TJB tem 3 perninhas e cada uma tem uma função bem definida. Qual associação está correta?',
+    options: [
+      'Base = Comando | Coletor = Entrada da corrente | Emissor = Saída da corrente',
+      'Base = Saída | Coletor = Comando | Emissor = Entrada',
+      'As três perninhas fazem exatamente a mesma coisa'
+    ], correct: 0,
+    hint: 'Lembre-se: a Base comanda, o Coletor recebe e o Emissor deixa sair.',
+    explanation: 'Excelente! A Base controla o fluxo, o Coletor recebe a energia da fonte e a corrente sai pelo Emissor.' },
+
+  { id: 3, phase: 1, type: 'choice',
+    prompt: '<strong>Missão 3 — A Porta do MOSFET (FET)</strong><br>O transistor FET é acionado por tensão (volts) sem precisar gastar corrente na entrada. Qual é o pino que funciona como a "porta de acionamento" do FET?',
+    options: ['Gate (Porta)', 'Dreno (Drain)', 'Fonte (Source)'], correct: 0,
+    hint: 'A palavra em inglês Gate significa Porta. É por onde a tensão avisa se o componente deve ligar.',
+    explanation: 'Muito bem! O Gate (Porta) usa a tensão aplicada para abrir ou fechar o caminho da corrente no canal.',
+    illustration: 'mosfetSymbol' },
+
+  { id: 4, phase: 1, type: 'choice',
+    prompt: '<strong>Missão 4 — A Ponte de Luz (Optoacoplador)</strong><br>O Optoacoplador conecta dois circuitos usando apenas a luz. Para que ele serve em uma placa eletrônica?',
+    options: [
+      'Passar informações por luz, mantendo os fios da entrada totalmente isolados dos fios da saída',
+      'Guardar energia elétrica como se fosse uma pilha',
+      'Esquentar a placa quando estiver frio'
+    ], correct: 0,
+    hint: 'Pense em duas pessoas conversando através de uma janela fechada usando lanternas, sem se tocarem.',
+    explanation: 'Certíssimo! Um LED interno pisca e um sensor lê a luz do outro lado, garantindo isolamento elétrico total e segurança contra curto-circuitos.',
+    illustration: 'optoSymbol' },
+
+  { id: 5, phase: 1, type: 'choice',
+    prompt: '<strong>Missão 5 — O Time de Super-Heróis</strong><br>Vamos associar cada componente ao seu modo de funcionar:',
+    options: [
+      'TJB = Controle por corrente | FET = Controle por tensão | Optoacoplador = Comunicação por luz',
+      'TJB = Luz | FET = Corrente | Optoacoplador = Tensão',
+      'Todos funcionam exatamente da mesma forma'
+    ], correct: 0,
+    hint: 'TJB usa corrente, FET usa tensão e Optoacoplador usa luz!',
+    explanation: 'Sensacional! Cada componente tem uma habilidade própria para resolver necessidades diferentes do projeto.' },
+
+  /* FASE 2 */
+  { id: 6, phase: 2, type: 'choice',
+    prompt: '<strong>Missão 6 — Transistor Desligado (Corte)</strong><br>Quando não colocamos nenhuma corrente na Base do TJB, ele entra na região de Corte. O que acontece com a lâmpada ligada a ele?',
+    options: [
+      'A lâmpada fica DESLIGADA, pois o transistor funciona como uma chave aberta',
+      'A lâmpada pisca em várias cores',
+      'A lâmpada liga no brilho máximo'
+    ], correct: 0,
+    hint: 'Região de Corte = Chave aberta = Circuito desligado.',
+    explanation: 'Correto! No corte, nenhuma corrente passa para a carga e o transistor atua como um interruptor desligado.' },
+
+  { id: 7, phase: 2, type: 'choice',
+    prompt: '<strong>Missão 7 — O Ajuste de Volume (Região Ativa)</strong><br>Na Região Ativa, o transistor funciona como um botão de volume. Qual é o uso principal dessa região?',
+    options: [
+      'Amplificar sinais (fazer um som fraco virar um som forte e proporcional)',
+      'Desligar o circuito para sempre',
+      'Fazer o componente rodar como um motor'
+    ], correct: 0,
+    hint: 'Na região ativa, se você aumenta um pouquinho o sinal na entrada, a saída aumenta de forma proporcional.',
+    explanation: 'Muito bem! A região ativa permite reproduzir e multiplicar sinais elétricos com precisão.' },
+
+  { id: 8, phase: 2, type: 'choice',
+    prompt: '<strong>Missão 8 — Interruptor Ligado (Saturação)</strong><br>Quando colocamos corrente suficiente na Base, o TJB entra em Saturação. Como ele se comporta?',
+    options: [
+      'Como uma chave LIGADA (deixando passar a corrente para a carga)',
+      'Como um muro que bloqueia a energia',
+      'Como um capacitor'
+    ], correct: 0,
+    hint: 'Saturação = Torneira toda aberta = Interruptor fechado/ligado.',
+    explanation: 'Perfeito! Na saturação, o transistor atua como uma chave fechada e a tensão entre coletor e emissor fica bem baixinha.' },
+
+  { id: 9, phase: 2, type: 'choice',
+    prompt: '<strong>Missão 9 — Identificando os Símbolos (NPN e PNP)</strong><br>Como identificamos se o símbolo do transistor é NPN ou PNP olhando a setinha da perninha do Emissor?',
+    options: [
+      'NPN tem a seta apontando para FORA; PNP tem a seta apontando para DENTRO',
+      'NPN é sempre quadrado e PNP é redondo',
+      'O NPN não possui setinha no desenho'
+    ], correct: 0,
+    hint: 'Regra visual: NPN = Não Parei Nela (seta aponta para fora) | PNP = Pode Nos Penetrar (seta aponta para dentro)!',
+    explanation: 'Excelente memória visual! A seta no emissor indica a direção da corrente e diferencia o NPN do PNP no esquema.',
+    illustration: 'npnPnp' },
+
+  { id: 10, phase: 2, type: 'calc',
+    prompt: '<strong>Missão 10 — Calculando a Tensão da Porta (V<sub>GS</sub>)</strong><br>O transistor FET precisa de uma tensão entre a Porta (V<sub>G</sub>) e a Fonte (V<sub>S</sub>) chamada V<sub>GS</sub>. Se a Porta está em 5 V e a Fonte está no 0 V (terra), qual é a tensão V<sub>GS</sub>?',
+    formula: 'V<sub>GS</sub> = V<sub>G</sub> − V<sub>S</sub>',
+    data: ['V<sub>G</sub> = 5 V', 'V<sub>S</sub> = 0 V'],
+    answerValue: 5, unit: 'V',
+    hint: 'Subtração simples: 5 − 0 = ?',
+    explanation: 'Ótimo trabalho! 5 − 0 = 5 V. Essa tensão na porta é o suficiente para acionar o canal do FET.',
+    illustration: 'mosfetSymbol' },
+
+  /* FASE 3 */
+  { id: 11, phase: 3, type: 'choice',
+    prompt: '<strong>Missão 11 — O Guardinha de Trânsito (Resistor de Base)</strong><br>Por que NUNCA devemos ligar o pino do microcontrolador direto na Base do TJB sem um resistor no caminho?',
+    options: [
+      'Porque o resistor limita a corrente e evita que o transistor ou o microcontrolador queimem',
+      'Porque o resistor serve apenas para alterar a cor do circuito',
+      'Porque sem resistor a placa fica muito fria'
+    ], correct: 0,
+    hint: 'O resistor funciona como um guardinha que controla o excesso de elétrons para não danificar o componente.',
+    explanation: 'Exatamente! O resistor de base limita a corrente em um valor seguro.' },
+
+  { id: 12, phase: 3, type: 'calc',
+    prompt: '<strong>Missão 12 — Calculando o Resistor de Proteção (R<sub>B</sub>)</strong><br>Vamos calcular um resistor de base com valores bem simples! Qual o valor do resistor R<sub>B</sub> em Ohms (Ω)?',
+    formula: 'R<sub>B</sub> = Tensão / Corrente',
+    data: ['Tensão disponível = 4 V', 'Corrente desejada = 0,002 A (2 mA)'],
+    answerValue: 2000, unit: 'Ω',
+    hint: 'Divida 4 por 0,002. O resultado é 2000!',
+    explanation: 'Parabéns! Um resistor de 2000 Ω (2 kΩ) garante a corrente exata e segura para a base do transistor.' },
+
+  { id: 13, phase: 3, type: 'choice',
+    prompt: '<strong>Missão 13 — O Escudo Antichoque (Diodo de Roda Livre)</strong><br>Quando desligamos a bobina de um relé ou motor, ela gera um pico perigoso de alta tensão. Qual componente usamos em paralelo com a bobina para absorver esse choque?',
+    options: [
+      'Diodo de roda livre',
+      'Pedacinho de plástico',
+      'Fusível de vidro comum'
+    ], correct: 0,
+    hint: 'Esse diodo funciona como um escudo protetor que captura o pico de energia e o desvia com segurança.',
+    explanation: 'Perfeito! O diodo de roda livre evita que o transistor de acionamento seja danificado por surtos de tensão.' },
+
+  { id: 14, phase: 3, type: 'choice',
+    prompt: '<strong>Missão 14 — O Despertador do MOSFET (V<sub>GS(th)</sub>)</strong><br>O manual do MOSFET diz que ele começa a conduzir com 2 V (V<sub>GS(th)</sub> = 2 V). Isso significa que com 2 V ele já liga um motor pesado com força total?',
+    options: [
+      'Não. 2 V é apenas o limiar em que ele começa a conduzir; para força total é necessária uma tensão maior na porta',
+      'Sim, 2 V liga qualquer motor na velocidade máxima instantaneamente'
+    ], correct: 0,
+    hint: '2 V é como o alarme tocando de manhã: ele apenas acorda o componente, mas ele precisa de mais energia para trabalhar pesado.',
+    explanation: 'Muito bem! V<sub>GS(th)</sub> é a tensão inicial de limiar. Para condução plena, aplicamos tensões maiores.' },
+
+  { id: 15, phase: 3, type: 'choice',
+    prompt: '<strong>Missão 15 — Os Dois Inimigos do MOSFET</strong><br>Quais são os dois cuidados fundamentais que devemos ter ao manusear e usar um MOSFET de potência?',
+    options: [
+      'Proteger contra a eletricidade estática das mãos (ESD) e usar dissipador de calor se ele esquentar',
+      'Proteger contra barulhos altos e luz do sol',
+      'Guardar dentro de um copo com água'
+    ], correct: 0,
+    hint: 'A porta do MOSFET é sensível a faíscas estáticas invisíveis e o seu corpo esquenta quando passa muita corrente.',
+    explanation: 'Excelente! Devemos descarregar a estática do corpo antes de tocar no componente e instalar dissipadores de alumínio quando ele opera sob carga elevada.' },
+
+  /* FASE 4 */
+  { id: 16, phase: 4, type: 'order',
+    prompt: '<strong>Missão 16 — O Caminho da Luz</strong><br>Organize as etapas do caminho da informação dentro do Optoacoplador na ordem correta (do início ao fim):',
+    items: [
+      'Sinal elétrico de entrada chega',
+      'O LED interno acende',
+      'A luz atravessa a barreira',
+      'O sensor óptico recebe a luz',
+      'Sinal elétrico de saída é ativado'
+    ],
+    hint: 'Pense na sequência: Eletricidade → Virar Luz → Atravessar → Ler Luz → Virar Eletricidade!',
+    explanation: 'Sensacional! Essa sequência garante a transferência do sinal sem qualquer ligação elétrica direta entre entrada e saída.',
+    illustration: 'optoSymbol' },
+
+  { id: 17, phase: 4, type: 'calc',
+    prompt: '<strong>Missão 17 — Resistor do LED do Optoacoplador</strong><br>Vamos calcular o resistor para o LED de entrada do optoacoplador! Qual o valor do resistor em Ohms (Ω)?',
+    formula: 'R = Tensão / Corrente',
+    data: ['Tensão restante = 3 V', 'Corrente do LED = 0,003 A (3 mA)'],
+    answerValue: 1000, unit: 'Ω',
+    hint: 'Divida 3 por 0,003. O resultado é 1000!',
+    explanation: 'Maravilha! Um resistor de 1000 Ω (1 kΩ) limita a corrente e faz o LED interno acender com total segurança.' },
+
+  { id: 18, phase: 4, type: 'calc',
+    prompt: '<strong>Missão 18 — Calculando a Resposta de Luz (CTR)</strong><br>O ganho de luz do optoacoplador chama-se CTR. Se o CTR é de 50% e aplicamos 10 mA no LED de entrada, qual será a corrente na saída em mA?',
+    formula: 'Corrente de saída = Corrente de entrada × (CTR / 100)',
+    data: ['CTR = 50%', 'Corrente de entrada = 10 mA'],
+    answerValue: 5, unit: 'mA',
+    hint: 'Quanto é a metade (50%) de 10? É 5!',
+    explanation: 'Certíssimo! 50% de 10 mA = 5 mA. O CTR define a proporção de corrente gerada na saída a partir da luz do LED.' },
+
+  { id: 19, phase: 4, type: 'choice',
+    prompt: '<strong>Missão 19 — Escolhendo o Tipo de Optoacoplador</strong><br>Qual optoacoplador é o mais indicado quando queremos disparar cargas ligadas na rede elétrica de corrente alternada (CA)?',
+    options: [
+      'Optoacoplador com saída Fototriac (ex: MOC3021)',
+      'Optoacoplador com lâmpada de filamento',
+      'Qualquer um serve sem diferença'
+    ], correct: 0,
+    hint: 'Falou em corrente alternada (CA) da tomada, o Fototriac é o componente correto.',
+    explanation: 'Perfeito! O fototriac é projetado especificamente para acionar e isolar circuitos de potência em corrente alternada.' },
+
+  { id: 20, phase: 4, type: 'choice',
+    prompt: '<strong>Missão 20 — A Regra de Segurança do Isolamento</strong><br>O isolamento por luz do optoacoplador suporta qualquer tensão do mundo sem queimar?',
+    options: [
+      'Não. O isolamento depende dos limites descritos no manual (datasheet) e de uma montagem correta na placa',
+      'Sim, ele é indestrutível contra qualquer voltagem'
+    ], correct: 0,
+    hint: 'Até mesmo uma parede de proteção tem uma altura limite. Sempre conferimos os limites de fábrica!',
+    explanation: 'Ótima resposta! O isolamento elétrico é extremamente eficiente desde que respeitemos as especificações de tensão do fabricante.' },
+
+  /* FASE 5 */
+  { id: 21, phase: 5, type: 'choice',
+    prompt: '<strong>Missão 21 — O Músculo do Sensor</strong><br>Um sensor de presença fornece um sinal de 5 V, mas não tem corrente suficiente para acionar a bobina de um relé. O que devemos colocar entre o sensor e o relé?',
+    options: [
+      'Um transistor (TJB ou MOSFET) para atuar como chave de potência',
+      'Ligar o sensor direto com um pedaço de barbante',
+      'Trocar o relé por um resistor pequeno'
+    ], correct: 0,
+    hint: 'O transistor funciona como um "músculo" elétrico que recebe o comando do sensor e liga o relé.',
+    explanation: 'Correto! O transistor recebe a pequena corrente do sensor e chaveia a corrente necessária para a bobina.' },
+
+  { id: 22, phase: 5, type: 'choice',
+    prompt: '<strong>Missão 22 — O Segredo do Controle PWM</strong><br>Para controlar a velocidade de um motor elétrico com um MOSFET sem gerar aquecimento excessivo, usamos o sinal PWM. Como o PWM funciona?',
+    options: [
+      'Ligando e desligando o MOSFET muito rápido; quanto mais tempo ligado, maior a velocidade do motor',
+      'Segurando o eixo do motor com as mãos para ele ir mais devagar',
+      'Diminuindo o tamanho das pilhas do circuito'
+    ], correct: 0,
+    hint: 'É como piscar uma lanterna rapidamente: se ela passa mais tempo acesa do que apagada, a luz parece mais forte!',
+    explanation: 'Perfeito! Variar o tempo ligado (duty cycle) ajusta a potência média entregue ao motor com alta eficiência.' },
+
+  { id: 23, phase: 5, type: 'choice',
+    prompt: '<strong>Missão 23 — Protegendo o Cérebro do Robô</strong><br>Em qual situação o uso do Optoacoplador é fundamental em um projeto industrial?',
+    options: [
+      'Quando precisamos isolar o microcontrolador sensível de ruídos e altas tensões do circuito de potência',
+      'Quando queremos apenas mudar a cor de um LED',
+      'Quando a placa não tem espaço para fios'
+    ], correct: 0,
+    hint: 'O optoacoplador funciona como um capacete de proteção para o microcontrolador do robô.',
+    explanation: 'Excelente! Ele impede que picos de tensão e ruídos da etapa de potência queimem o circuito de controle.' },
+
+  { id: 24, phase: 5, type: 'choice',
+    prompt: '<strong>Missão 24 — O Manual do Componente (Datasheet)</strong><br>Onde encontramos a ordem correta dos pinos e a corrente máxima de um transistor antes de soldá-lo na placa?',
+    options: [
+      'No Datasheet (folha de dados técnicos do fabricante)',
+      'Adivinhando pelo tamanho da peça',
+      'Olhando a cor do plástico'
+    ], correct: 0,
+    hint: 'Pecinhas pretas parecidas podem ter pinagens totalmente diferentes por dentro. O Datasheet é o manual oficial!',
+    explanation: 'Certíssimo! O técnico em mecatrônica sempre consulta o Datasheet para garantir uma montagem correta e segura.' },
+
+  { id: 25, phase: 5, type: 'choice',
+    prompt: '<strong>Missão 25 — O Time Completo de Mecatrônica</strong><br>Vamos montar o sistema completo de automação! Qual é a função de cada componente no robô?',
+    options: [
+      'TJB = Trata o sinal do sensor | Optoacoplador = Isola com luz | MOSFET = Chaveia a corrente do motor',
+      'Todos os três exercem exatamente a mesma função',
+      'O MOSFET lê o sensor e o TJB cria a luz do circuito'
+    ], correct: 0,
+    hint: 'Lembre-se da ordem: Sensor → Condicionamento (TJB) → Isolamento de segurança (Opto) → Potência do motor (MOSFET).',
+    explanation: 'PARABÉNS! Você concluiu todas as 25 missões! Agora você domina como os semicondutores trabalham em equipe nos sistemas eletrônicos e na mecatrônica!' }
+];
+
+/* =========================================================
+   6. EMBARALHAMENTO DAS ALTERNATIVAS
+   ========================================================= */
+function shuffleChoiceOptions() {
+  QUESTIONS.forEach(q => {
+    if (q.type !== 'choice' || !Array.isArray(q.options)) return;
+    const correctText = q.options[q.correct];
+    const arr = [...q.options];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    q.options = arr;
+    q.correct = arr.indexOf(correctText);
+  });
+}
+
+/* =========================================================
+   7. REVISÃO
+   ========================================================= */
+const REVIEW_CARDS = [
+  { title: 'TJB — Visão Geral', body: 'Transistor Bipolar de Junção (TJB). Funciona como uma torneira controlada por corrente. Aplicamos uma pequena corrente na Base para controlar uma corrente maior entre Coletor e Emissor.' },
+  { title: 'TJB — Terminais', body: 'Base (B): pino de controle | Coletor (C): entrada da corrente | Emissor (E): saída da corrente. Consulte o Datasheet para confirmar a posição física dos pinos.' },
+  { title: 'TJB — NPN vs PNP', body: 'No NPN a seta no Emissor aponta para FORA. No PNP a seta no Emissor aponta para DENTRO.' },
+  { title: 'TJB — Regiões de Operação', body: 'Corte = Chave aberta (desligado) | Região Ativa = Amplificador (botão de volume) | Saturação = Chave fechada (ligado).' },
+  { title: 'Resistor de Base', body: 'Limita a corrente de comando para não queimar a Base do transistor nem o pino do microcontrolador.' },
+  { title: 'Proteção contra Picos (Diodo)', body: 'Cargas indutivas (relés e motores) geram picos de tensão ao desligar. O Diodo de Roda Livre em paralelo absorve esses picos com segurança.' },
+  { title: 'MOSFET — Visão Geral', body: 'Transistor de Efeito de Campo acionado por tensão (volts) no Gate, sem gastar corrente na entrada.' },
+  { title: 'MOSFET — Terminais', body: 'Gate (Porta) = controle por tensão | Drain (Dreno) = entrada/saída do canal | Source (Fonte) = referência do canal.' },
+  { title: 'Cuidados com MOSFET', body: '1. Cuidado com a Eletricidade Estática (ESD) nas mãos. 2. Instalar dissipador de calor quando o componente esquentar sob carga alta.' },
+  { title: 'MOSFET e Controle PWM', body: 'O sinal PWM liga e desliga o MOSFET rapidamente. Quanto maior o tempo ligado (duty cycle), maior a velocidade média do motor.' },
+  { title: 'Optoacoplador — Visão Geral', body: 'Transmite dados usando luz. Possui um LED interno e um sensor fotossensível. Garante isolamento elétrico total entre a entrada e a saída.' },
+  { title: 'Optoacoplador — Tipos', body: 'Fototransistor = sinais digitais normais | Fototriac = acionamento de cargas em corrente alternada (tomada 110V/220V) | Saída Lógica = comunicação em alta velocidade.' },
+  { title: 'Consulta ao Datasheet', body: 'O Datasheet é o manual oficial do fabricante. Sempre consulte o Datasheet para verificar a pinagem correta e os limites elétricos antes de montar.' }
+];
+
+/* =========================================================
+   8. ESTADO E PREFERÊNCIAS
+   ========================================================= */
+const STORAGE_KEY = 'missao-eletronica-v3';
+const state = {
+  currentQ: 0,
+  completed: [],
+  prefs: { fontScale: 1, contrast: false, motion: false, sound: false },
+  tab: 'missions',
+  currentLab: 'tjb'
+};
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ completed: state.completed, prefs: state.prefs })); }
+  catch (e) {}
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (Array.isArray(d.completed)) state.completed = d.completed;
+    if (d.prefs) state.prefs = { ...state.prefs, ...d.prefs };
+  } catch (e) {}
+}
+function isCompleted(id) { return state.completed.includes(id); }
+function isAllDone() { return QUESTIONS.every(q => isCompleted(q.id)); }
+
+function applyPrefs() {
+  document.documentElement.style.setProperty('--fs', state.prefs.fontScale);
+  document.body.classList.toggle('hc', state.prefs.contrast);
+  document.body.classList.toggle('no-motion', state.prefs.motion);
+  document.getElementById('opt-contrast').checked = state.prefs.contrast;
+  document.getElementById('opt-motion').checked = state.prefs.motion;
+  document.getElementById('opt-sound').checked = state.prefs.sound;
+  saveState();
+}
+function bindPrefs() {
+  document.getElementById('fs-dec').onclick = () => { state.prefs.fontScale = Math.max(0.85, +(state.prefs.fontScale - 0.1).toFixed(2)); applyPrefs(); };
+  document.getElementById('fs-reset').onclick = () => { state.prefs.fontScale = 1; applyPrefs(); };
+  document.getElementById('fs-inc').onclick = () => { state.prefs.fontScale = Math.min(1.6, +(state.prefs.fontScale + 0.1).toFixed(2)); applyPrefs(); };
+  document.getElementById('opt-contrast').onchange = e => { state.prefs.contrast = e.target.checked; applyPrefs(); };
+  document.getElementById('opt-motion').onchange = e => { state.prefs.motion = e.target.checked; applyPrefs(); };
+  document.getElementById('opt-sound').onchange = e => { state.prefs.sound = e.target.checked; applyPrefs(); };
+  document.getElementById('btn-comfort').onclick = () => {
+    const panel = document.getElementById('comfort-panel');
+    const btn = document.getElementById('btn-comfort');
+    const hidden = panel.classList.toggle('hidden');
+    btn.setAttribute('aria-expanded', String(!hidden));
+  };
+}
+
+/* =========================================================
+   9. SOM
+   ========================================================= */
+let audioCtx = null;
+function playTone(kind) {
+  if (!state.prefs.sound) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const t = audioCtx.currentTime;
+    if (kind === 'success') {
+      osc.frequency.setValueAtTime(523.25, t);
+      osc.frequency.setValueAtTime(659.25, t + 0.1);
+      osc.frequency.setValueAtTime(783.99, t + 0.2);
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      osc.start(t); osc.stop(t + 0.4);
+    } else if (kind === 'click') {
+      osc.frequency.setValueAtTime(380, t);
+      gain.gain.setValueAtTime(0.06, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      osc.start(t); osc.stop(t + 0.08);
+    } else if (kind === 'soft') {
+      osc.frequency.setValueAtTime(300, t);
+      gain.gain.setValueAtTime(0.05, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      osc.start(t); osc.stop(t + 0.15);
+    }
+  } catch (e) {}
+}
+
+/* =========================================================
+   10. ABAS
+   ========================================================= */
+function switchTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.setAttribute('aria-selected', String(btn.dataset.tab === tab));
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'lab') renderLabTab();
+  if (tab === 'components') renderComponentGallery();
+  window.scrollTo({ top: 0, behavior: state.prefs.motion ? 'auto' : 'smooth' });
+}
+function bindTabs() {
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+/* =========================================================
+   11. MAPA DE PROGRESSO
+   ========================================================= */
+function phaseStats(phaseId) {
+  const inPhase = QUESTIONS.filter(q => q.phase === phaseId);
+  return { total: inPhase.length, done: inPhase.filter(q => isCompleted(q.id)).length };
+}
+function isPhaseDone(phaseId) { const s = phaseStats(phaseId); return s.done === s.total; }
+function currentPhaseId() {
+  if (state.currentQ >= QUESTIONS.length) return 5;
+  return QUESTIONS[state.currentQ].phase;
+}
+function renderProgressMap() {
+  const map = document.getElementById('progress-map');
+  if (!map) return;
+  map.innerHTML = '';
+  const currentP = currentPhaseId();
+  PHASES.forEach(p => {
+    const stats = phaseStats(p.id);
+    const done = isPhaseDone(p.id);
+    const isCurrent = p.id === currentP && !isAllDone();
+    const box = document.createElement('div');
+    box.className = 'rounded-lg p-3 border-2 text-sm ' +
+      (done ? 'bg-emerald-50 border-emerald-400' : isCurrent ? 'bg-indigo-50 border-indigo-400' : 'bg-slate-50 border-slate-200');
+    box.setAttribute('aria-label', `Fase ${p.id}: ${p.name}. ${stats.done} de ${stats.total} missões concluídas${done ? '. Concluída.' : '.'}`);
+    const star = done ? '⭐' : isCurrent ? '🎯' : '⚪';
+    box.innerHTML = `
+      <div class="text-lg leading-none mb-1" aria-hidden="true">${star}</div>
+      <div class="font-semibold text-slate-800 leading-tight">Fase ${p.id}</div>
+      <div class="text-xs text-slate-600">${p.short}</div>
+      <div class="text-xs text-slate-500 mt-1">${stats.done}/${stats.total}</div>`;
+    map.appendChild(box);
+  });
+}
+
+/* =========================================================
+   12. MISSÕES
+   ========================================================= */
+function currentQuestion() { return state.currentQ < QUESTIONS.length ? QUESTIONS[state.currentQ] : null; }
+function phaseName(id) { const p = PHASES.find(x => x.id === id); return p ? p.name : ''; }
+
+function renderMission() {
+  if (isAllDone() && state.currentQ >= QUESTIONS.length) { showCertificate(); return; }
+  if (state.currentQ >= QUESTIONS.length) {
+    state.currentQ = Math.max(0, QUESTIONS.findIndex(q => !isCompleted(q.id)));
+    if (state.currentQ < 0) { showCertificate(); return; }
+  }
+  const q = currentQuestion();
+  if (!q) { showCertificate(); return; }
+
+  document.getElementById('mission-badge').textContent = `Missão ${q.id} de 25`;
+  document.getElementById('phase-label').textContent = `Fase ${q.phase}: ${phaseName(q.phase)}`;
+  document.getElementById('mission-prompt').innerHTML = q.prompt;
+
+  const illusArea = document.getElementById('illustration-area');
+  if (q.illustration && ILLUS[q.illustration]) {
+    illusArea.innerHTML = `<div class="bg-slate-50 rounded-lg p-3 border border-slate-200">${ILLUS[q.illustration]}</div>`;
+    illusArea.classList.remove('hidden');
+  } else {
+    illusArea.innerHTML = '';
+    illusArea.classList.add('hidden');
+  }
+
+  const dataPanel = document.getElementById('data-panel');
+  if (q.type === 'calc' && (q.formula || q.data)) {
+    dataPanel.classList.remove('hidden');
+    dataPanel.innerHTML = `
+      <p class="font-semibold text-slate-700 mb-1">Fórmula:</p>
+      <p class="mb-2">${q.formula}</p>
+      <p class="font-semibold text-slate-700 mb-1">Dados:</p>
+      <ul class="list-disc list-inside">${q.data.map(d => `<li>${d}</li>`).join('')}</ul>`;
+  } else {
+    dataPanel.classList.add('hidden');
+    dataPanel.innerHTML = '';
+  }
+
+  document.getElementById('feedback-area').innerHTML = '';
+  document.getElementById('btn-hint').classList.remove('hidden');
+  document.getElementById('btn-explain').classList.add('hidden');
+  document.getElementById('btn-next').classList.add('hidden');
+
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  if (q.type === 'choice') renderChoice(q, area);
+  else if (q.type === 'calc') renderCalc(q, area);
+  else if (q.type === 'order') renderOrder(q, area);
+
+  document.getElementById('btn-hint').onclick = () => showHint(q);
+  document.getElementById('btn-explain').onclick = () => showExplanation(q);
+  document.getElementById('btn-next').onclick = () => advanceQuestion();
+
+  renderProgressMap();
+}
+
+function renderChoice(q, area) {
+  const wrap = document.createElement('div');
+  wrap.className = 'space-y-2';
+  wrap.setAttribute('role', 'group');
+  wrap.setAttribute('aria-label', 'Alternativas');
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option-btn w-full text-left border-2 border-slate-300 rounded-lg px-4 py-3 bg-white';
+    btn.innerHTML = `<span class="inline-block w-6 font-bold text-indigo-700">${String.fromCharCode(65 + idx)}.</span> ${opt}`;
+    btn.addEventListener('click', () => checkChoice(q, idx, wrap));
+    wrap.appendChild(btn);
+  });
+  area.appendChild(wrap);
+}
+
+function checkChoice(q, idx, wrap) {
+  if (isCompleted(q.id)) return;
+  const buttons = wrap.querySelectorAll('button');
+  if (idx === q.correct) {
+    buttons.forEach(b => b.disabled = true);
+    buttons[idx].classList.add('correct');
+    playTone('success');
+    showFeedback(true, 'Muito bem! Você acertou a missão.', q);
+    markCorrect(q);
+  } else {
+    buttons[idx].classList.add('wrong');
+    buttons[idx].disabled = true;
+    playTone('soft');
+    showFeedback(false, 'Ainda não é essa. Clique na dica para ajudar!', q);
+  }
+}
+
+function renderCalc(q, area) {
+  const wrap = document.createElement('div');
+  wrap.className = 'space-y-3';
+  wrap.innerHTML = `
+    <label for="calc-input" class="block text-sm font-semibold text-slate-700">Sua resposta ${q.unit ? `(em ${q.unit})` : ''}:</label>
+    <div class="flex flex-wrap gap-2 items-center">
+      <input id="calc-input" type="text" inputmode="decimal"
+             class="w-40 px-3 py-2 border-2 border-slate-300 rounded-lg focus:border-indigo-500 outline-none"
+             aria-describedby="calc-unit">
+      <span id="calc-unit" class="text-slate-600 font-semibold">${q.unit || ''}</span>
+      <button id="calc-submit" type="button" class="bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg font-semibold text-sm">Conferir</button>
+    </div>`;
+  area.appendChild(wrap);
+  const input = wrap.querySelector('#calc-input');
+  const submit = wrap.querySelector('#calc-submit');
+  const doCheck = () => {
+    if (isCompleted(q.id)) return;
+    const val = parseNumeric(input.value);
+    if (isNaN(val)) {
+      showFeedback(false, 'Digite um valor numérico. Exemplo: 2000.', q);
+      return;
+    }
+    if (Math.abs(val - q.answerValue) < 0.01) {
+      submit.disabled = true; input.disabled = true;
+      playTone('success');
+      showFeedback(true, 'Parabéns! O cálculo está exato.', q);
+      markCorrect(q);
+    } else {
+      playTone('soft');
+      showFeedback(false, 'O valor ainda não está correto. Veja os dados na fórmula e tente novamente.', q);
+    }
+  };
+  submit.addEventListener('click', doCheck);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') doCheck(); });
+}
+
+function parseNumeric(str) {
+  if (!str) return NaN;
+  const cleaned = String(str).replace(/\s/g, '').replace(',', '.').replace(/[^0-9.\-]/g, '');
+  return parseFloat(cleaned);
+}
+
+function renderOrder(q, area) {
+  const scrambled = shuffleArray([...q.items]);
+  const selected = [];
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="mb-2 text-sm text-slate-600">Clique nas etapas na ordem correta (do início ao fim):</div>
+    <div id="order-pool" class="flex flex-wrap gap-2 mb-3"></div>
+    <div class="text-sm font-semibold text-slate-700 mb-1">Sua sequência:</div>
+    <ol id="order-selected" class="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[3rem] space-y-1 text-sm"></ol>
+    <div class="flex gap-2 mt-3">
+      <button id="order-clear" type="button" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded text-sm font-medium">Limpar</button>
+      <button id="order-submit" type="button" class="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-1.5 rounded text-sm font-medium">Conferir ordem</button>
+    </div>`;
+  area.appendChild(wrap);
+  const pool = wrap.querySelector('#order-pool');
+  const selectedList = wrap.querySelector('#order-selected');
+
+  function renderPool() {
+    pool.innerHTML = '';
+    scrambled.forEach(item => {
+      if (selected.includes(item)) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bg-white border-2 border-slate-300 hover:border-indigo-500 rounded-lg px-3 py-1.5 text-sm';
+      btn.textContent = item;
+      btn.addEventListener('click', () => {
+        if (isCompleted(q.id)) return;
+        selected.push(item);
+        renderPool(); renderSelected();
+        playTone('click');
+      });
+      pool.appendChild(btn);
+    });
+  }
+  function renderSelected() {
+    selectedList.innerHTML = '';
+    if (selected.length === 0) {
+      selectedList.innerHTML = '<li class="text-slate-400">Nenhum item selecionado.</li>';
+    } else {
+      selected.forEach((it, i) => {
+        const li = document.createElement('li');
+        li.className = 'flex justify-between items-center';
+        li.innerHTML = `<span><span class="font-bold text-indigo-700 mr-2">${i + 1}.</span>${it}</span>`;
+        if (!isCompleted(q.id)) {
+          const rm = document.createElement('button');
+          rm.type = 'button';
+          rm.className = 'text-slate-500 hover:text-red-600 text-sm';
+          rm.setAttribute('aria-label', `Remover ${it}`);
+          rm.textContent = '×';
+          rm.addEventListener('click', () => {
+            const idx = selected.indexOf(it);
+            if (idx >= 0) selected.splice(idx, 1);
+            renderPool(); renderSelected();
+          });
+          li.appendChild(rm);
+        }
+        selectedList.appendChild(li);
+      });
+    }
+  }
+  wrap.querySelector('#order-clear').addEventListener('click', () => {
+    if (isCompleted(q.id)) return;
+    selected.length = 0;
+    renderPool(); renderSelected();
+  });
+  wrap.querySelector('#order-submit').addEventListener('click', () => {
+    if (isCompleted(q.id)) return;
+    if (selected.length !== q.items.length) {
+      showFeedback(false, 'Selecione todas as etapas antes de conferir.', q);
+      return;
+    }
+    const ok = selected.every((it, i) => it === q.items[i]);
+    if (ok) {
+      playTone('success');
+      showFeedback(true, 'Excelente! A sequência do caminho da luz está perfeita.', q);
+      markCorrect(q);
+      wrap.querySelector('#order-submit').disabled = true;
+      wrap.querySelector('#order-clear').disabled = true;
+      renderSelected();
+    } else {
+      playTone('soft');
+      showFeedback(false, 'A ordem ainda não está certa. Lembre-se: Eletricidade → Virar Luz → Atravessar → Ler Luz → Virar Eletricidade.', q);
+    }
+  });
+  renderPool();
+  renderSelected();
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showFeedback(ok, message, q) {
+  const area = document.getElementById('feedback-area');
+  area.innerHTML = `
+    <div class="${ok ? 'feedback-success' : 'feedback-info'} p-3 rounded-lg text-sm">
+      <p class="font-semibold">${ok ? '✅ ' : '💡 '}${message}</p>
+      ${ok && q ? `<p class="mt-2 text-slate-800">${q.explanation}</p>` : ''}
+    </div>`;
+}
+function showHint(q) {
+  document.getElementById('feedback-area').innerHTML = `
+    <div class="feedback-info p-3 rounded-lg text-sm">
+      <p class="font-semibold mb-1">💡 Dica</p>
+      <p>${q.hint || 'Leia o enunciado com atenção e pense na função de cada pecinha.'}</p>
+    </div>`;
+  playTone('click');
+}
+function showExplanation(q) {
+  document.getElementById('feedback-area').innerHTML = `
+    <div class="feedback-success p-3 rounded-lg text-sm">
+      <p class="font-semibold mb-1">📘 Explicação</p>
+      <p>${q.explanation}</p>
+      <p class="mt-2 text-slate-700">Clique em "Próxima missão" para continuar.</p>
+    </div>`;
+  document.getElementById('btn-explain').classList.add('hidden');
+  document.getElementById('btn-next').classList.remove('hidden');
+  document.getElementById('btn-hint').classList.add('hidden');
+}
+function markCorrect(q) {
+  if (!isCompleted(q.id)) {
+    state.completed.push(q.id);
+    saveState();
+  }
+  document.getElementById('btn-hint').classList.add('hidden');
+  document.getElementById('btn-explain').classList.remove('hidden');
+  document.getElementById('btn-next').classList.remove('hidden');
+  renderProgressMap();
+}
+function advanceQuestion() {
+  playTone('click');
+  if (state.currentQ < QUESTIONS.length - 1) {
+    state.currentQ++;
+    renderMission();
+  } else {
+    if (isCompleted(QUESTIONS[QUESTIONS.length - 1].id)) {
+      state.currentQ = QUESTIONS.length;
+      showCertificate();
+    } else {
+      renderMission();
+    }
+  }
+}
+function showCertificate() {
+  document.getElementById('mission-section').classList.add('hidden');
+  document.getElementById('certificate-screen').classList.remove('hidden');
+  renderProgressMap();
+}
+
+/* =========================================================
+   13. LABORATÓRIO
+   ========================================================= */
+function renderLabTab() {
+  const detail = document.getElementById('lab-detail');
+  if (state.currentLab === 'tjb') detail.innerHTML = renderTJBLab();
+  else if (state.currentLab === 'mosfet') detail.innerHTML = renderMOSFETLab();
+  else detail.innerHTML = renderOptoLab();
+  document.querySelectorAll('.lab-tab').forEach(btn => {
+    const on = btn.dataset.lab === state.currentLab;
+    btn.setAttribute('aria-selected', String(on));
+    btn.className = 'lab-tab px-4 py-2 rounded-lg text-sm font-semibold ' +
+      (on ? 'bg-indigo-700 text-white' : 'bg-slate-100 hover:bg-slate-200');
+  });
+  bindLabInteractions();
+}
+
+function renderTJBLab() {
+  return `<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div class="p-5">
+      <h3 class="text-lg font-bold text-indigo-900 mb-1">🔺 TJB — O Botão da Torneira</h3>
+      <p class="text-sm text-slate-700 mb-4">O TJB funciona como uma torneira. A corrente pequena na Base abre o caminho para passar uma corrente maior do Coletor para o Emissor.</p>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-slate-50 rounded-lg p-4 flex flex-col items-center justify-center">
+          ${svgNPN({ labels: true })}
+        </div>
+        <div class="space-y-3">
+          <div class="bg-indigo-50 rounded-lg p-3">
+            <p class="text-xs font-semibold text-indigo-900 mb-1 uppercase tracking-wide">Pinos do Transistor</p>
+            <ul class="text-sm space-y-1">
+              <li><strong class="text-indigo-800">Base (B):</strong> botão de controle</li>
+              <li><strong class="text-indigo-800">Coletor (C):</strong> entrada da energia</li>
+              <li><strong class="text-indigo-800">Emissor (E):</strong> saída da energia</li>
+            </ul>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="lab-tjb-on" type="button" class="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded text-sm font-medium">▶ Ligar Base (Saturação)</button>
+            <button id="lab-tjb-off" type="button" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded text-sm font-medium">■ Desligar Base (Corte)</button>
+          </div>
+          <p id="lab-tjb-state" class="text-sm italic text-slate-700" aria-live="polite">Estado: transistor desligado (Corte).</p>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200 pt-4">
+        <h4 class="font-semibold text-slate-800 mb-2">Aplicação: Ligando um Relé</h4>
+        <div id="lab-tjb-anim" class="bg-slate-50 rounded-lg p-3 flex justify-center">
+          ${svgTJBCircuit()}
+        </div>
+        <p class="text-xs text-slate-600 mt-2">O resistor R<sub>B</sub> protege a Base. O <strong>Diodo de Roda Livre</strong> protege contra o choque gerado ao desligar o relé.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderMOSFETLab() {
+  return `<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div class="p-5">
+      <h3 class="text-lg font-bold text-indigo-900 mb-1">🔷 MOSFET — Acionado por Tensão</h3>
+      <p class="text-sm text-slate-700 mb-4">O MOSFET é acionado pela tensão (Volts) aplicada na Porta (Gate), sem gastar corrente na entrada.</p>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-slate-50 rounded-lg p-4 flex flex-col items-center justify-center">
+          ${svgMOSFET({ labels: true })}
+        </div>
+        <div class="space-y-3">
+          <div class="bg-indigo-50 rounded-lg p-3">
+            <p class="text-xs font-semibold text-indigo-900 mb-1 uppercase tracking-wide">Pinos do MOSFET</p>
+            <ul class="text-sm space-y-1">
+              <li><strong class="text-indigo-800">Gate (G):</strong> porta de acionamento</li>
+              <li><strong class="text-indigo-800">Drain (D):</strong> dreno de energia</li>
+              <li><strong class="text-indigo-800">Source (S):</strong> fonte/referência</li>
+            </ul>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="lab-mos-on" type="button" class="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded text-sm font-medium">▶ Aplicar Tensão (5 V)</button>
+            <button id="lab-mos-off" type="button" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded text-sm font-medium">■ Tirar Tensão (0 V)</button>
+          </div>
+          <p id="lab-mos-state" class="text-sm italic text-slate-700" aria-live="polite">Estado: canal fechado (motor desligado).</p>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200 pt-4">
+        <h4 class="font-semibold text-slate-800 mb-2">Aplicação: Controle de Motor com PWM</h4>
+        <div id="lab-mos-anim" class="bg-slate-50 rounded-lg p-3 flex justify-center">
+          ${svgMOSFETCircuit()}
+        </div>
+        <p class="text-xs text-slate-600 mt-2">O sinal <strong>PWM</strong> liga e desliga a porta muito rápido para controlar a velocidade do motor sem esquentar o componente.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderOptoLab() {
+  return `<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div class="p-5">
+      <h3 class="text-lg font-bold text-indigo-900 mb-1">💡 Optoacoplador — Ponte de Luz</h3>
+      <p class="text-sm text-slate-700 mb-4">O Optoacoplador passa o sinal elétrico transformando ele em luz, mantendo um circuito totalmente isolado do outro.</p>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-slate-50 rounded-lg p-4 flex flex-col items-center justify-center">
+          ${svgOpto({ labels: true })}
+        </div>
+        <div class="space-y-3">
+          <div class="bg-indigo-50 rounded-lg p-3">
+            <p class="text-xs font-semibold text-indigo-900 mb-1 uppercase tracking-wide">Pinos do Optoacoplador (PC817)</p>
+            <ul class="text-sm space-y-1">
+              <li><strong class="text-indigo-800">1 e 2:</strong> entrada do LED de luz</li>
+              <li><strong class="text-indigo-800">3 e 4:</strong> saída do sensor de luz</li>
+            </ul>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="lab-opto-on" type="button" class="bg-indigo-700 hover:bg-indigo-800 text-white px-3 py-2 rounded text-sm font-medium">▶ Acender LED Interno</button>
+            <button id="lab-opto-off" type="button" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded text-sm font-medium">■ Apagar LED Interno</button>
+          </div>
+          <p id="lab-opto-state" class="text-sm italic text-slate-700" aria-live="polite">Estado: LED apagado (sem sinal na saída).</p>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200 pt-4">
+        <h4 class="font-semibold text-slate-800 mb-2">Aplicação: Protegendo o Microcontrolador (3,3V → 24V)</h4>
+        <div id="lab-opto-anim" class="bg-slate-50 rounded-lg p-3 flex justify-center">
+          ${svgOptoCircuit()}
+        </div>
+        <p class="text-xs text-slate-600 mt-2">A <strong>barreira de luz</strong> impede que picos de 24 Volts entrem e queimem o microcontrolador sensível de 3,3 Volts.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindLabInteractions() {
+  const tjbOn = document.getElementById('lab-tjb-on');
+  const tjbOff = document.getElementById('lab-tjb-off');
+  const tjbState = document.getElementById('lab-tjb-state');
+  const tjbAnim = document.getElementById('lab-tjb-anim');
+  if (tjbOn && tjbOff) {
+    tjbOn.addEventListener('click', () => {
+      tjbAnim.classList.add('lab-on');
+      tjbState.textContent = 'Estado: transistor ligado (Saturação) — a corrente passa e ativa o relé!';
+      playTone('click');
+    });
+    tjbOff.addEventListener('click', () => {
+      tjbAnim.classList.remove('lab-on');
+      tjbState.textContent = 'Estado: transistor desligado (Corte) — nenhuma corrente passa.';
+    });
+  }
+
+  const mosOn = document.getElementById('lab-mos-on');
+  const mosOff = document.getElementById('lab-mos-off');
+  const mosState = document.getElementById('lab-mos-state');
+  const mosAnim = document.getElementById('lab-mos-anim');
+  if (mosOn && mosOff) {
+    mosOn.addEventListener('click', () => {
+      mosAnim.classList.add('lab-on');
+      mosState.textContent = 'Estado: tensão na porta ativada — o canal abre e o motor gira!';
+      playTone('click');
+    });
+    mosOff.addEventListener('click', () => {
+      mosAnim.classList.remove('lab-on');
+      mosState.textContent = 'Estado: porta sem tensão — motor parado.';
+    });
+  }
+
+  const optoOn = document.getElementById('lab-opto-on');
+  const optoOff = document.getElementById('lab-opto-off');
+  const optoState = document.getElementById('lab-opto-state');
+  const optoAnim = document.getElementById('lab-opto-anim');
+  if (optoOn && optoOff) {
+    optoOn.addEventListener('click', () => {
+      optoAnim.classList.add('lab-on');
+      optoState.textContent = 'Estado: LED aceso — a luz atravessa a janela e ativa a saída com segurança!';
+      playTone('click');
+    });
+    optoOff.addEventListener('click', () => {
+      optoAnim.classList.remove('lab-on');
+      optoState.textContent = 'Estado: LED apagado — saída desligada.';
+    });
+  }
+}
+
+function bindLabTabs() {
+  document.querySelectorAll('.lab-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.currentLab = btn.dataset.lab;
+      renderLabTab();
+    });
+  });
+}
+
+/* =========================================================
+   14. GALERIA
+   ========================================================= */
+function renderComponentGallery() {
+  const grid = document.getElementById('component-grid');
+  const comps = [
+    { name: 'BC547', type: 'Transistor TJB NPN', pkg: 'TO-92', svg: svgTO92('BC547', 'B 166'),
+      desc: 'Transistor bipolar NPN clássico. Ótimo para acionar lâmpadas pequenas, relés e leds.',
+      specs: ['Corrente máxima: 100 mA', 'Tensão máxima: 45 V', 'Encapsulamento preto de plástico TO-92'],
+      note: 'Consulte o Datasheet para conferir a ordem dos pinos (B, C, E) antes de soldar.' },
+    { name: '2N2222', type: 'Transistor TJB NPN', pkg: 'TO-92', svg: svgTO92('2N2222', 'NPN'),
+      desc: 'Transistor NPN muito resistente para uso geral e chaveamento de pequenos motores.',
+      specs: ['Corrente máxima: 600 mA', 'Tensão máxima: 40 V', 'Encapsulamento TO-92'],
+      note: 'A ordem dos pinos pode ser diferente da do BC547. Sempre olhe o manual!' },
+    { name: 'IRFZ44N', type: 'MOSFET de Potência', pkg: 'TO-220', svg: svgTO220('IRFZ44N'),
+      desc: 'MOSFET forte para motores pesados, solenoides e controle PWM.',
+      specs: ['Suporta alta corrente (até 49 A)', 'Acionado por tensão no Gate', 'Possui aba de metal para dissipador'],
+      note: 'Cuidado com eletricidade estática (ESD) nas mãos ao segurar essa peça.' },
+    { name: 'BS170', type: 'MOSFET de Pequeno Sinal', pkg: 'TO-92', svg: svgTO92('BS170', 'N-MOS'),
+      desc: 'MOSFET pequeno acionado por tensão, ideal para circuitos integrados simples.',
+      specs: ['Tensão máxima: 60 V', 'Corrente máxima: 500 mA', 'Encapsulamento TO-92'],
+      note: 'Funciona com tensão na porta e não precisa de corrente contínua para manter ligado.' },
+    { name: 'PC817', type: 'Optoacoplador Simples', pkg: 'DIP-4', svg: svgDIP4('PC817', 'SHARP'),
+      desc: 'Isolador óptico com 4 perninhas. Isola placas de controle de circuitos com ruído.',
+      specs: ['Isolamento por luz de alta segurança', '4 pinos (LED de um lado, sensor do outro)', 'Encapsulamento DIP-4'],
+      note: 'É obrigatório usar um resistor no pino do LED de entrada para não queimá-lo.' },
+    { name: '6N137', type: 'Optoacoplador Lógico Rápido', pkg: 'DIP-8', svg: svgDIP4('6N137', 'LOGIC'),
+      desc: 'Optoacoplador especial para transferência de dados digitais em alta velocidade.',
+      specs: ['Isolamento por luz', 'Velocidade muito alta para dados', 'Encapsulamento DIP-8'],
+      note: 'Possui 8 pinos e uma pinagem diferente do PC817.' },
+    { name: 'MOC3021', type: 'Optoacoplador Fototriac', pkg: 'DIP-6', svg: svgDIP4('MOC3021', 'DIP-6'),
+      desc: 'Optoacoplador projetado especificamente para acionar lâmpadas e cargas na tomada (Corrente Alternada).',
+      specs: ['Saída Fototriac para cargas AC', 'Isolamento seguro da rede elétrica', 'Encapsulamento DIP-6'],
+      note: 'Usado para acionar cargas de alta tensão mantendo o robô seguro.' }
+  ];
+
+  grid.innerHTML = comps.map(c => `
+    <article class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col">
+      <div class="flex justify-center bg-slate-50 rounded-lg p-3 mb-3 min-h-[170px] items-center">${c.svg}</div>
+      <h3 class="font-bold text-indigo-900">${c.name}</h3>
+      <p class="text-xs text-slate-500 mb-2">${c.type} · ${c.pkg}</p>
+      <p class="text-sm text-slate-700 mb-3 leading-relaxed">${c.desc}</p>
+      <div class="mt-auto">
+        <p class="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Destaques</p>
+        <ul class="text-xs text-slate-700 space-y-1 list-disc list-inside mb-2">
+          ${c.specs.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+        <p class="text-xs text-amber-800 bg-amber-50 border-l-2 border-amber-400 p-2 rounded">💡 Dica técnica: ${c.note}</p>
+      </div>
+    </article>
+  `).join('');
+}
+
+/* =========================================================
+   15. REVISÃO
+   ========================================================= */
+function renderReview() {
+  const content = document.getElementById('review-content');
+  content.innerHTML = REVIEW_CARDS.map(card => `
+    <article class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+      <h3 class="font-semibold text-indigo-900 mb-1">${card.title}</h3>
+      <p class="text-sm text-slate-700 leading-relaxed">${card.body}</p>
+    </article>
+  `).join('');
+}
+function openReview() {
+  renderReview();
+  document.getElementById('review-modal').classList.remove('hidden');
+  document.getElementById('btn-review-close').focus();
+}
+function closeReview() {
+  document.getElementById('review-modal').classList.add('hidden');
+  document.getElementById('btn-review').focus();
+}
+
+/* =========================================================
+   16. CERTIFICADO EM PAISAGEM
+   ========================================================= */
+function buildCertificateHTML() {
+  const name = (document.getElementById('student-name').value || '').trim() || 'Estudante de Mecatrônica';
+  const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  return `
+    <div style="
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #1e293b;
+      width: 285mm;
+      height: 198mm;
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 0;
+      page-break-after: avoid;
+    ">
+      <div style="
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 45%, #fffbeb 100%);
+        border: 3px solid #b45309;
+        padding: 5mm;
+        position: relative;
+      ">
+        <div style="
+          width: 100%;
+          height: 100%;
+          box-sizing: border-box;
+          border: 1px solid #b45309;
+          padding: 8mm 14mm;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        ">
+
+          <!-- Cantos ornamentais -->
+          <svg style="position:absolute;top:0;left:0;width:28mm;height:28mm;" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 5 5 L 40 5 L 40 10 L 10 10 L 10 40 L 5 40 Z" fill="#b45309"/>
+            <circle cx="22" cy="22" r="4" fill="none" stroke="#b45309" stroke-width="1.5"/>
+          </svg>
+          <svg style="position:absolute;top:0;right:0;width:28mm;height:28mm;transform:scaleX(-1);" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 5 5 L 40 5 L 40 10 L 10 10 L 10 40 L 5 40 Z" fill="#b45309"/>
+            <circle cx="22" cy="22" r="4" fill="none" stroke="#b45309" stroke-width="1.5"/>
+          </svg>
+          <svg style="position:absolute;bottom:0;left:0;width:28mm;height:28mm;transform:scaleY(-1);" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 5 5 L 40 5 L 40 10 L 10 10 L 10 40 L 5 40 Z" fill="#b45309"/>
+            <circle cx="22" cy="22" r="4" fill="none" stroke="#b45309" stroke-width="1.5"/>
+          </svg>
+          <svg style="position:absolute;bottom:0;right:0;width:28mm;height:28mm;transform:scale(-1);" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 5 5 L 40 5 L 40 10 L 10 10 L 10 40 L 5 40 Z" fill="#b45309"/>
+            <circle cx="22" cy="22" r="4" fill="none" stroke="#b45309" stroke-width="1.5"/>
+          </svg>
+
+          <!-- Cabeçalho -->
+          <div style="text-align:center;">
+            <p style="font-size: 10px; letter-spacing: 5px; color: #92400e; margin: 0; text-transform: uppercase;">SENAI · Missão Eletrônica</p>
+            <div style="margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <div style="height: 1px; width: 40mm; background: #b45309;"></div>
+              <p style="font-size: 9px; letter-spacing: 3px; color: #b45309; margin: 0; text-transform: uppercase;">Certificado de conclusão</p>
+              <div style="height: 1px; width: 40mm; background: #b45309;"></div>
+            </div>
+            <h1 style="font-size: 40px; color: #1e1b4b; margin: 6px 0 0; letter-spacing: 4px; font-family: Georgia, serif;">CERTIFICADO</h1>
+            <p style="font-size: 13px; color: #92400e; margin: 2px 0 0; letter-spacing: 6px; font-style: italic; font-family: Georgia, serif;">de conquista técnico-pedagógica</p>
+          </div>
+
+          <!-- Corpo -->
+          <div style="text-align: center; padding: 0 8mm;">
+            <p style="font-size: 12px; color: #475569; margin: 0 0 3px; letter-spacing: 1px;">Certificamos que</p>
+            <p style="
+              font-size: 34px;
+              font-weight: bold;
+              color: #1e1b4b;
+              margin: 4px 0 6px;
+              letter-spacing: 2px;
+              font-family: Georgia, serif;
+              line-height: 1.15;
+              word-break: break-word;
+            ">${escapeHtml(name)}</p>
+            <div style="width: 55%; margin: 0 auto 10px; border-top: 1px solid #b45309;"></div>
+            <p style="font-size: 12.5px; line-height: 1.6; color: #334155; max-width: 220mm; margin: 0 auto; text-align: center;">
+              concluiu com êxito as <strong>25 missões</strong> da atividade
+              <strong>Missão Eletrônica — Desafio dos Semicondutores</strong>,
+              demonstrando pleno domínio no uso de transistores bipolares (TJB), MOSFETs
+              e optoacopladores em sistemas mecânicos e eletrônicos no curso de <strong>Técnico em Mecatrônica</strong>.
+            </p>
+          </div>
+
+          <!-- Rodapé com assinaturas -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px;">
+            <div style="text-align: center; width: 70mm;">
+              <div style="border-top: 1px solid #1e293b; padding-top: 4px; font-size: 10px; color: #334155;">
+                Instrutor Responsável
+              </div>
+            </div>
+
+            <!-- Selo central -->
+            <div style="
+              width: 26mm; height: 26mm;
+              border-radius: 50%;
+              border: 3px double #b45309;
+              background: radial-gradient(circle, #fef3c7 0%, #fde68a 100%);
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 2px 6px rgba(180,83,9,0.3);
+              font-family: Georgia, serif;
+            ">
+              <div style="font-size: 16px; color: #b45309; line-height: 1;">★</div>
+              <div style="font-size: 7px; color: #92400e; letter-spacing: 1px; margin-top: 2px; font-weight: bold;">SENAI</div>
+              <div style="font-size: 6px; color: #92400e; letter-spacing: .5px;">MECATRÔNICA</div>
+            </div>
+
+            <div style="text-align: center; width: 70mm;">
+              <div style="border-top: 1px solid #1e293b; padding-top: 4px; font-size: 10px; color: #334155;">
+                Coordenação do Curso
+              </div>
+            </div>
+          </div>
+
+          <!-- Data -->
+          <div style="text-align: center; font-size: 11px; color: #475569; margin-top: 4px;">
+            Concluído em <strong style="color: #1e1b4b;">${dateStr}</strong>
+          </div>
+
+          <!-- Nota -->
+          <p style="font-size: 8.5px; color: #92400e; text-align: center; margin: 4px 0 0; font-style: italic;">
+            Atividade interativa acessível com foco na aplicação prática de mecatrônica.
+          </p>
+
+        </div>
+      </div>
+    </div>
+  `;
+}
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function printCertificate() {
+  document.getElementById('certificate-print-content').innerHTML = buildCertificateHTML();
+  window.print();
+}
+
+/* =========================================================
+   17. REINÍCIO
+   ========================================================= */
+function restartActivity() {
+  const ok = window.confirm('Deseja reiniciar a atividade? Todo o progresso das 25 missões será zerado.');
+  if (!ok) return;
+  state.completed = [];
+  state.currentQ = 0;
+  saveState();
+  document.getElementById('certificate-screen').classList.add('hidden');
+  document.getElementById('student-name').value = '';
+  document.getElementById('mission-section').classList.remove('hidden');
+  shuffleChoiceOptions();
+  renderMission();
+}
+
+/* =========================================================
+   18. INICIALIZAÇÃO
+   ========================================================= */
+function init() {
+  loadState();
+  applyPrefs();
+  bindPrefs();
+  bindTabs();
+  bindLabTabs();
+  renderLabTab();
+  renderComponentGallery();
+  renderProgressMap();
+
+  shuffleChoiceOptions();
+
+  document.getElementById('btn-review').onclick = openReview;
+  document.getElementById('btn-review-close').onclick = closeReview;
+  document.getElementById('review-modal').onclick = e => {
+    if (e.target.id === 'review-modal') closeReview();
+  };
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('review-modal');
+      if (!modal.classList.contains('hidden')) closeReview();
+    }
+  });
+  document.getElementById('btn-print').onclick = printCertificate;
+  document.getElementById('btn-restart').onclick = restartActivity;
+
+  const idx = QUESTIONS.findIndex(q => !isCompleted(q.id));
+  if (idx === -1) { state.currentQ = QUESTIONS.length; showCertificate(); }
+  else { state.currentQ = idx; renderMission(); }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
